@@ -1,11 +1,11 @@
 const bcrypt = require('bcrypt');
-const Admin = require('../models/adminSchema.ts');
-const Sclass = require('../models/sclassSchema.ts');
-const Student = require('../models/studentSchema.ts');
-const Teacher = require('../models/teacherSchema');
+const Admin = require('../models/adminSchema.js');
+const Sclass = require('../models/sclassSchema.js');
+const Student = require('../models/studentSchema.js');
+const Teacher = require('../models/teacherSchema.js');
 const Subject = require('../models/subjectSchema.js');
-const Notice = require('../models/noticeSchema.ts');
-const Complain = require('../models/complainSchema.ts');
+const Notice = require('../models/noticeSchema.js');
+const Complain = require('../models/complainSchema.js');
 
 // const adminRegister = async (req, res) => {
 //     try {
@@ -56,8 +56,6 @@ const Complain = require('../models/complainSchema.ts');
 // };
 
 const adminRegister = async (req, res) => {
-    console.log("=== ADMIN REGISTER HIT ===");  // ✅ Yeh line add karo
-  console.log(req.body); 
     try {
         const admin = new Admin({
             ...req.body

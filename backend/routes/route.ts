@@ -694,14 +694,14 @@ router.post('/class-teacher-assignment', classTeacherAssignmentController.addCla
 router.put('/class-teacher-assignment/:id', classTeacherAssignmentController.updateClassTeacherAssignment);
 router.delete('/class-teacher-assignment/:id', classTeacherAssignmentController.deleteClassTeacherAssignment);
 
-const timetableController = require('../controllers/timetableController');
+// const timetableController = require('../controllers/timetableController');
 
-// Debug: Log controller import
-console.log('timetableController imported:', timetableController);
+// // Debug: Log controller import
+// console.log('timetableController imported:', timetableController);
 
-router.get('/:adminID/:teacherId', timetableController.getTeacherTimetable);
-router.post('/attendance/:adminID', timetableController.addAttendance);
-router.post('/:adminID', timetableController.addTimetable);
+// router.get('/:adminID/:teacherId', timetableController.getTeacherTimetable);
+// router.post('/attendance/:adminID', timetableController.addAttendance);
+// router.post('/:adminID', timetableController.addTimetable);
 
 
 
