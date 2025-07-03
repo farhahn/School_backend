@@ -1,5 +1,5 @@
 import axios from "axios";
-import { getRequest, getSuccess, getError, stuffDone } from "../../expenseRelated/phoneSlice";
+import { getRequest, getSuccess, getError, stuffDone } from "./phoneSlice";
 
 const api = axios.create({
   baseURL: process.env.REACT_APP_BASE_URL,

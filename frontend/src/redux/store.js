@@ -12,7 +12,7 @@ import complaintReducer from "./FrontOffice/Enquiry/complaintSlice.js";
 import admissionEnquiryReducer from './FrontOffice/Enquiry/admissionEnquirySlice.js';
 import postalDispatchReducer from './FrontOffice/Enquiry/postalDispatchSlice.js';
 import postalReceiveReducer from './FrontOffice/Enquiry/postalReceiveSlice.js';
-import phoneCallLogsReducer from "./expenseRelated/phoneSlice.js";
+import phoneCallLogsReducer from "./FrontOffice/Enquiry/phoneSlice.js";
 import frontOfficeReducer from './FrontOffice/Enquiry/frontOfficeSlice.js';
 import visitorReducer from './FrontOffice/Enquiry/VisitorSlice.js';
 import incomeReducer from './IncomeRelated/IncomeSlice.js';
