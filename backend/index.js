@@ -6,6 +6,7 @@ const dotenv = require("dotenv");
 const app = express();
 const fs = require("fs");
 
+
 // Load environment variables from .env file
 dotenv.config();
 
@@ -35,7 +36,7 @@ mongoose
 
 // Routes
 // Adjust the path based on whether route.js is JavaScript or TypeScript
-const Routes = require("./routes/route"); // Changed .ts to .js (see notes below)
+const Routes = require("./routes/route.ts"); // Changed .ts to .js (see notes below)
 
 app.use("/", Routes);
 
