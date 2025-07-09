@@ -15,13 +15,13 @@ app.use(express.json({ limit: "10mb" }));
 app.use(cors());
 
 // Serve uploaded files
-app.use("/uploads", express.static(path.join(__dirname, "Uploads")));
+// app.use("/uploads", express.static(path.join(__dirname, "Uploads")));
 
 // Create uploads folder if it doesn't exist
-const uploadsDir = path.join(__dirname, "Uploads");
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(UploadsDir);
-}
+// const uploadsDir = path.join(__dirname, "Uploads");
+// if (!fs.existsSync(uploadsDir)) {
+//   fs.mkdirSync(UploadsDir);
+// }
 
 // MongoDB connection
 const MONGO_URL = process.env.MONGO_URL || "mongodb+srv://Farhan555:Farhan555@school.mpetrpe.mongodb.net/?retryWrites=true&w=majority";
