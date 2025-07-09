@@ -11,11 +11,7 @@ import {
     getRequest,
     getFailed,
     getError,
-    
-   
-   
 } from './userSlice';
-import { createAsyncThunk } from '@reduxjs/toolkit';
 
 export const loginUser = (fields, role) => async (dispatch) => {
     dispatch(authRequest());
@@ -128,22 +124,3 @@ export const addStuff = (fields, address) => async (dispatch) => {
         dispatch(authError(error));
     }
 };
-
-
-
-// Fetch Librarians
-
-
-
-
-export const fetchLibrarians = createAsyncThunk(
-  'user/fetchLibrarians',
-  async (_, { rejectWithValue }) => {
-    try {
-      const response = await axios.get('http://localhost:5000/Librarians'); // ✅ Correct API URL
-      return response.data;
-    } catch (error) {
-      return rejectWithValue(error.response?.data || "Error fetching librarians");
-    }
-  }
-);

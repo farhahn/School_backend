@@ -12,9 +12,9 @@ import {
 } from './IncomeSlice';
 
 const api = axios.create({
-  baseURL: process.env.REACT_APP_BASE_URL,
+  baseURL: 'http://localhost:5000',
   headers: {
-    "Content-Type": "application/json",
+    'Content-Type': 'application/json',
   },
 });
 

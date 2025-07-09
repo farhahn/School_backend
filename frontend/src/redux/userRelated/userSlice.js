@@ -1,8 +1,4 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { fetchLibrarians } from './userHandle';
-
-
-
 
 const initialState = {
     status: 'idle',
@@ -13,8 +9,7 @@ const initialState = {
     currentRole: (JSON.parse(localStorage.getItem('user')) || {}).role || null,
     error: null,
     response: null,
-    darkMode: true,
-    librarians: [],
+    darkMode: true
 };
 
 const userSlice = createSlice({
@@ -86,20 +81,6 @@ const userSlice = createSlice({
             state.darkMode = !state.darkMode;
         }
     },
-    extraReducers: (builder) => {
-        builder
-            .addCase(fetchLibrarians.pending, (state) => {
-                state.status = 'loading';
-            })
-            .addCase(fetchLibrarians.fulfilled, (state, action) => {
-                state.status = 'succeeded';
-                state.librarians = action.payload;
-            })
-            .addCase(fetchLibrarians.rejected, (state, action) => {
-                state.status = 'failed';
-                state.error = action.payload;
-            });
-    },
 });
 
 export const {
@@ -119,6 +100,3 @@ export const {
 } = userSlice.actions;
 
 export const userReducer = userSlice.reducer;
-
-
-
