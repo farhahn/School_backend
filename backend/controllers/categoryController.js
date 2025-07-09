@@ -1,119 +1,94 @@
 const mongoose = require('mongoose');
 const Category = require('../models/Category');
-const { sanitize } = require('express-mongo-sanitize');
 
-const sendResponse = (res, status, message, data = null, count = null) => {
-  const response = { message };
-  if (data !== null) response.data = data;
-  if (count !== null) response.count = count;
-  return res.status(status).json(response);
-};
-
-// Generate a unique categoryId
-const generateCategoryId = async (schoolId) => {
-  const lastCategory = await Category.findOne({ school: schoolId })
-    .sort({ categoryId: -1 })
-    .lean();
-  return lastCategory ? lastCategory.categoryId + 1 : 1;
-};
-
-// Fetch all categories
-exports.getAllCategories = async (req, res) => {
+exports.getCategories = async (req, res) => {
   try {
-    const { adminID } = req.params;
-
+    const adminID = req.params.adminID;
     if (!mongoose.Types.ObjectId.isValid(adminID)) {
-      return sendResponse(res, 400, 'Invalid admin ID format');
+      console.error(`Invalid adminID format: ${adminID}`);
+      return res.status(400).json({ message: 'Invalid adminID format' });
     }
-
+    console.log(`Fetching categories for adminID: ${adminID}`);
     const categories = await Category.find({ school: new mongoose.Types.ObjectId(adminID) })
-      .sort({ name: 1 })
-      .lean()
-      .select('categoryId name');
-
-    const formattedCategories = categories.map(cat => ({
-      id: cat.categoryId,
-      name: cat.name,
-      _id: cat._id, // Include MongoDB ID for deletion
-    }));
-
-    return sendResponse(res, 200, 'Categories fetched successfully', formattedCategories, formattedCategories.length);
+      .sort({ createdAt: -1 })
+      .lean();
+    console.log(`Found ${categories.length} categories for adminID: ${adminID}`);
+    console.log('Categories:', JSON.stringify(categories, null, 2));
+    res.status(200).json({
+      message: 'Categories fetched successfully',
+      data: categories,
+      count: categories.length,
+    });
   } catch (error) {
-    console.error('Error fetching categories:', error.message, error.stack);
-    return sendResponse(res, 500, `Server error while fetching categories: ${error.message}`);
+    console.error('Error fetching categories:', error.message);
+    res.status(500).json({ message: 'Server error while fetching categories', error: error.message });
   }
 };
 
-// Create a new category
-exports.createCategory = async (req, res) => {
+exports.addCategory = async (req, res) => {
   try {
-    const { adminID } = req.params;
-    const { name } = sanitize(req.body);
-
+    const { name, description, adminID } = req.body;
+    if (!name || !description || !adminID) {
+      return res.status(400).json({ message: 'Missing required fields' });
+    }
     if (!mongoose.Types.ObjectId.isValid(adminID)) {
-      return sendResponse(res, 400, 'Invalid admin ID format');
+      return res.status(400).json({ message: 'Invalid adminID format' });
     }
-
-    if (!name || name.trim() === '') {
-      return sendResponse(res, 400, 'Category name is required');
-    }
-
-    // Check for duplicate category
-    const existingCategory = await Category.findOne({
-      school: new mongoose.Types.ObjectId(adminID),
-      name: { $regex: `^${name.trim()}$`, $options: 'i' },
-    });
-
-    if (existingCategory) {
-      return sendResponse(res, 400, 'Category already exists');
-    }
-
-    const categoryId = await generateCategoryId(new mongoose.Types.ObjectId(adminID));
-
     const newCategory = new Category({
       name: name.trim(),
-      categoryId,
+      description: description.trim(),
+      active: true,
       school: new mongoose.Types.ObjectId(adminID),
+      categoryId: new mongoose.Types.ObjectId().toString(),
     });
-
     await newCategory.save();
-
-    return sendResponse(res, 201, 'Category created successfully', {
-      id: newCategory.categoryId,
-      name: newCategory.name,
-      _id: newCategory._id,
-    });
+    console.log('Added new category:', JSON.stringify(newCategory, null, 2));
+    res.status(201).json({ message: 'Category added successfully', data: newCategory });
   } catch (error) {
-    console.error('Error creating category:', error.message, error.stack);
-    return sendResponse(res, 500, `Server error while creating category: ${error.message}`);
+    console.error('Error adding category:', error.message);
+    if (error.code === 11000 && error.keyPattern?.name) {
+      return res.status(400).json({ message: 'Category name already exists', error: error.message });
+    }
+    res.status(500).json({ message: 'Server error while adding category', error: error.message });
   }
 };
 
-// Delete a category
+exports.updateCategory = async (req, res) => {
+  try {
+    const { name, description, active, adminID } = req.body;
+    if (!mongoose.Types.ObjectId.isValid(adminID)) {
+      return res.status(400).json({ message: 'Invalid adminID format' });
+    }
+    const category = await Category.findOne({ _id: req.params.id, school: new mongoose.Types.ObjectId(adminID) });
+    if (!category) {
+      return res.status(404).json({ message: 'Category not found' });
+    }
+    category.name = name ? name.trim() : category.name;
+    category.description = description ? description.trim() : category.description;
+    category.active = active !== undefined ? active : category.active;
+    await category.save();
+    console.log('Updated category:', category);
+    res.status(200).json({ message: 'Category updated successfully', data: category });
+  } catch (error) {
+    console.error('Error updating category:', error.message);
+    res.status(500).json({ message: 'Server error while updating category', error: error.message });
+  }
+};
+
 exports.deleteCategory = async (req, res) => {
   try {
-    const { adminID, categoryId } = req.params;
-
+    const adminID = req.query.adminID;
     if (!mongoose.Types.ObjectId.isValid(adminID)) {
-      return sendResponse(res, 400, 'Invalid admin ID format');
+      return res.status(400).json({ message: 'Invalid adminID format' });
     }
-
-    if (!mongoose.Types.ObjectId.isValid(categoryId)) {
-      return sendResponse(res, 400, 'Invalid category ID format');
+    const category = await Category.findOneAndDelete({ _id: req.params.id, school: new mongoose.Types.ObjectId(adminID) });
+    if (!category) {
+      return res.status(404).json({ message: 'Category not found' });
     }
-
-    const result = await Category.deleteOne({
-      _id: new mongoose.Types.ObjectId(categoryId),
-      school: new mongoose.Types.ObjectId(adminID),
-    });
-
-    if (result.deletedCount === 0) {
-      return sendResponse(res, 404, 'Category not found');
-    }
-
-    return sendResponse(res, 200, 'Category deleted successfully');
+    console.log('Deleted category:', category);
+    res.status(200).json({ message: 'Category deleted successfully' });
   } catch (error) {
-    console.error('Error deleting category:', error.message, error.stack);
-    return sendResponse(res, 500, `Server error while deleting category: ${error.message}`);
+    console.error('Error deleting category:', error.message);
+    res.status(500).json({ message: 'Server error while deleting category', error: error.message });
   }
 };

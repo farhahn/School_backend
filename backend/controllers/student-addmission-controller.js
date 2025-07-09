@@ -97,12 +97,23 @@ exports.addAdmissionForm = async (req, res) => {
       adminID,
     } = sanitize(req.body);
 
+    console.log('Sanitized request body:', req.body);
+
     if (!admissionNo || !classId || !section || !firstName || !dob || !adminID) {
       return sendResponse(res, 400, 'Missing required fields: admissionNo, classId, section, firstName, dob, adminID');
     }
 
-    if (!mongoose.Types.ObjectId.isValid(adminID) || !mongoose.Types.ObjectId.isValid(classId)) {
-      return sendResponse(res, 400, 'Invalid adminID or classId format');
+    if (!mongoose.Types.ObjectId.isValid(adminID)) {
+      return sendResponse(res, 400, 'Invalid adminID format');
+    }
+    if (!mongoose.Types.ObjectId.isValid(classId)) {
+      return sendResponse(res, 400, 'Invalid classId format');
+    }
+    if (routeId && !mongoose.Types.ObjectId.isValid(routeId)) {
+      return sendResponse(res, 400, 'Invalid routeId format');
+    }
+    if (pickupPointId && !mongoose.Types.ObjectId.isValid(pickupPointId)) {
+      return sendResponse(res, 400, 'Invalid pickupPointId format');
     }
 
     if (dob && isNaN(new Date(dob).getTime())) {
@@ -138,11 +149,17 @@ exports.addAdmissionForm = async (req, res) => {
     await newAdmissionForm.save();
     return sendResponse(res, 201, 'Admission form added successfully', newAdmissionForm);
   } catch (error) {
-    console.error('Error adding admission form:', error.stack);
-    return sendResponse(res, 500, 'Server error while adding admission form');
+    console.error('Error adding admission form:', error.message, error.stack);
+    if (error.code === 11000) {
+      return sendResponse(res, 400, `Duplicate admissionNo: ${req.body.admissionNo}`);
+    }
+    if (error.name === 'ValidationError') {
+      const messages = Object.values(error.errors).map((err) => err.message);
+      return sendResponse(res, 400, `Validation failed: ${messages.join(', ')}`);
+    }
+    return sendResponse(res, 500, `Server error while adding admission form: ${error.message}`);
   }
 };
-
 exports.updateAdmissionForm = async (req, res) => {
   try {
     const {

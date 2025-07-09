@@ -1,25 +1,27 @@
+// category-card-model.js
 const mongoose = require('mongoose');
 
 const categoryCardSchema = new mongoose.Schema({
-  categoryCard: {
+  category: {
     type: String,
     required: true,
-    maxlength: 100,
-    trim: true
+    trim: true,
+    unique: true,
   },
   description: {
     type: String,
+    required: true,
     trim: true,
-    maxlength: 500
   },
-  createdBy: {
+  admin: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Admin',
-    required: true
-  }
-}, {
-  timestamps: true
+    required: true,
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
 });
-categoryCardSchema.index({ categoryCard: 1, createdBy: 1 }, { unique: true });
 
 module.exports = mongoose.model('CategoryCard', categoryCardSchema);

@@ -119,7 +119,7 @@ router.get('/postal-receives/:adminID',  postalReceiveController.getPostalReceiv
 router.post('/postal-receive',  upload.single('document'), postalReceiveController.addPostalReceive);
 router.put('/postal-receive/:id',  upload.single('document'), postalReceiveController.updatePostalReceive);
 router.delete('/postal-receive/:id',  postalReceiveController.deletePostalReceive);
-const{
+const {
   getPhoneCallLogs,
   addPhoneCallLog,
   updatePhoneCallLog,
@@ -130,6 +130,7 @@ router.get("/phoneCallLogs/:adminID", getPhoneCallLogs);
 router.post("/phoneCallLog", addPhoneCallLog);
 router.put("/phoneCallLog/:id", updatePhoneCallLog);
 router.delete("/phoneCallLog/:id", deletePhoneCallLog);
+ 
 
 const {
   getEntries,
@@ -267,11 +268,16 @@ router.get('/bulkDeleteStudents/:adminID', getAllStudents);
 router.delete('/bulkDeleteStudents/:adminID', bulkDeleteStudents);
 
 
-const { getAllCategories, createCategory, deleteCategory } = require('../controllers/categoryController');
+const categoryController = require('../controllers/categoryController');
 
-router.get('/categories/:adminID', getAllCategories);
-router.post('/categories/:adminID', createCategory);
-router.delete('/categories/:adminID/:categoryId', deleteCategory);
+console.log('Registering category routes');
+router.get('/categories/:adminID', categoryController.getCategories);
+router.post('/category', categoryController.addCategory);
+router.put('/category/:id', categoryController.updateCategory);
+router.delete('/category/:id', categoryController.deleteCategory);
+
+
+
 
 const { getAllHouses, createHouse, deleteHouse } = require('../controllers/houseController');
 
@@ -416,13 +422,12 @@ router.get('/reminders/:adminID', reminderController.getReminders);
 router.put('/reminders/:adminID', reminderController.updateReminders);
 
   const {
-                createStore, 
-                getStores, 
-                updateStore, 
-                deleteStore, 
-                getStoreById 
-              } 
-              = require('../controllers/store-controller');
+  createStore,
+  getStores,
+  updateStore,
+  deleteStore,
+  getStoreById,
+} = require('../controllers/store-controller');
 
 
 /* const { 
@@ -560,28 +565,13 @@ router.delete('/suppliers/:id', deleteSupplier);         // Delete Supplier
 
 
 
-const {
-  createCategoryCard,
-  getCategoryCards,
-  getCategoryCardById,
-  updateCategoryCard,
-  deleteCategoryCard
-} = require('../controllers/category2Controller.ts');
 
-// Create CategoryCard
-router.post('/categoryCards', createCategoryCard);
+const categoryCardController = require('../controllers/categoryCard');
 
-// Get all CategoryCards (optionally by adminID)
-router.get('/categoryCards', getCategoryCards);
-
-// Get CategoryCard by ID
-router.get('/categoryCards/:id', getCategoryCardById);
-
-// Update CategoryCard by ID
-router.put('/categoryCards/:id', updateCategoryCard);
-
-// Delete CategoryCard by ID
-router.delete('/categoryCards/:id', deleteCategoryCard);
+router.get('/category-cards/:adminID', categoryCardController.getCategoryCards);
+router.post('/category-card', categoryCardController.addCategoryCard);
+router.put('/category-card/:id', categoryCardController.updateCategoryCard);
+router.delete('/category-card/:id', categoryCardController.deleteCategoryCard);
 
 
 
@@ -596,11 +586,9 @@ router.get('/Store/:id', getStoreById);
 
 const stockItemController = require('../controllers/stockItemController');
 
-
-
-router.get('/stock-items/:adminID',  stockItemController.getStockItems);
-router.post('/stock-item',  upload.single('document'), stockItemController.addStockItem);
-router.put('/stock-item/:id', upload.single('document'), stockItemController.updateStockItem);
+router.get('/stock-items/:adminID', stockItemController.getStockItems);
+router.post('/stock-item', stockItemController.addStockItem);
+router.put('/stock-item/:id', stockItemController.updateStockItem);
 router.delete('/stock-item/:id', stockItemController.deleteStockItem);
 
 

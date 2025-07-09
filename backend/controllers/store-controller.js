@@ -1,128 +1,156 @@
-const Store = require('../models/store-model');
 const mongoose = require('mongoose');
+const Store = require('../models/store-model');
 
-// Create Store
 exports.createStore = async (req, res) => {
   try {
-    console.log("Creating Store:", req.body);
+    console.log("Creating Store - Request body:", JSON.stringify(req.body, null, 2));
     const { storeName, storeCode, description, adminID } = req.body;
- 
+
     if (!storeName || !storeCode || !adminID) {
+      console.log("Missing required fields:", { storeName, storeCode, adminID });
       return res.status(400).json({ message: 'Missing required fields' });
-    } 
-
-    const existingStore = await Store.findOne({
-      storeCode,
-      createdBy: adminID
-    });
-
-    if (existingStore) {
-      return res.status(400).json({ message: 'Store code already exists' });
     }
 
-    const newStore = new Store({
-      storeName,
-      storeCode,
-      description,
-      createdBy: adminID
-    });
-
-    await newStore.save();
-    res.status(201).json({ success: true, store: newStore });
-  } catch (error) {
-     console.error("Error in createstore:", error);
-    res.status(500).json({ error: error.message });
-   
-  }
-};
-
-// Get All Stores
-
-
-// Get Stores by adminID (via query param)
-exports.getStores = async (req, res) => {
-  try {
-    const { adminID } = req.query;
-
-    console.log("adminID from query:", adminID); // Debugging
-
-    // Validate ObjectId format
     if (!mongoose.Types.ObjectId.isValid(adminID)) {
+      console.log("Invalid adminID format:", adminID);
       return res.status(400).json({ message: 'Invalid adminID format' });
     }
 
-    // Fetch stores created by this admin
-    const stores = await Store.find({ createdBy: new mongoose.Types.ObjectId(adminID) });
+    const newStore = new Store({
+      storeName: storeName.trim(),
+      storeCode: storeCode.trim(),
+      description: description ? description.trim() : '',
+      createdBy: new mongoose.Types.ObjectId(adminID),
+    });
 
-    console.log("Fetched stores count:", stores.length);
-    res.status(200).json(stores);
+    await newStore.save();
+    console.log('Store created successfully:', JSON.stringify(newStore, null, 2));
+    res.status(201).json({ message: 'Store created successfully', store: newStore });
   } catch (error) {
-    console.error("Error in getStores:", error);
-    res.status(500).json({ error: error.message });
+    console.error("Error in createStore:", {
+      message: error.message,
+      stack: error.stack,
+      code: error.code,
+      errors: error.errors,
+    });
+    if (error.code === 11000) {
+      return res.status(400).json({ message: 'Store code already exists for this admin' });
+    }
+    res.status(500).json({ message: 'Server error while creating store', error: error.message });
   }
 };
 
-// Get Store By ID
-exports.getStoreById = async (req, res) => {
+exports.getStores = async (req, res) => {
   try {
-    const store = await Store.findById(req.params.id);
+    const { adminID } = req.query;
+    console.log("Fetching stores for adminID:", adminID);
 
-    if (!store) {
-      return res.status(404).json({ error: 'Store not found' });
+    if (!mongoose.Types.ObjectId.isValid(adminID)) {
+      console.log("Invalid adminID format:", adminID);
+      return res.status(400).json({ message: 'Invalid adminID format' });
     }
 
-    res.status(200).json(store);
+    const stores = await Store.find({ createdBy: new mongoose.Types.ObjectId(adminID) })
+      .sort({ createdAt: -1 })
+      .lean();
+    console.log("Fetched stores count:", stores.length, JSON.stringify(stores, null, 2));
+    res.status(200).json(stores);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error("Error in getStores:", error.message);
+    res.status(500).json({ message: 'Server error while fetching stores', error: error.message });
   }
 };
 
+exports.getStoreById = async (req, res) => {
+  try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      console.log("Invalid store ID:", req.params.id);
+      return res.status(400).json({ message: 'Invalid store ID' });
+    }
+    const store = await Store.findById(req.params.id).lean();
+    if (!store) {
+      console.log("Store not found:", req.params.id);
+      return res.status(404).json({ message: 'Store not found' });
+    }
+    console.log('Fetched store:', JSON.stringify(store, null, 2));
+    res.status(200).json(store);
+  } catch (error) {
+    console.error("Error in getStoreById:", error.message);
+    res.status(500).json({ message: 'Server error while fetching store', error: error.message });
+  }
+};
 
-
-// Update Store
 exports.updateStore = async (req, res) => {
   try {
-    const store = await Store.findByIdAndUpdate(
-      req.params.id,
+    const { storeName, storeCode, description, adminID } = req.body;
+    console.log("Updating store - Request body:", JSON.stringify(req.body, null, 2));
+
+    if (!mongoose.Types.ObjectId.isValid(adminID)) {
+      console.log("Invalid adminID format:", adminID);
+      return res.status(400).json({ message: 'Invalid adminID format' });
+    }
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      console.log("Invalid store ID:", req.params.id);
+      return res.status(400).json({ message: 'Invalid store ID' });
+    }
+
+    const existingStore = await Store.findOne({
+      storeCode: { $regex: new RegExp(`^${storeCode}$`, 'i') },
+      createdBy: new mongoose.Types.ObjectId(adminID),
+      _id: { $ne: req.params.id },
+    });
+    if (existingStore) {
+      console.log("Store code already exists:", storeCode);
+      return res.status(400).json({ message: 'Store code already exists' });
+    }
+
+    const store = await Store.findOneAndUpdate(
+      { _id: req.params.id, createdBy: new mongoose.Types.ObjectId(adminID) },
       {
-        storeName: req.body.storeName,
-        storeCode: req.body.storeCode,
-        description: req.body.description
+        storeName: storeName ? storeName.trim() : undefined,
+        storeCode: storeCode ? storeCode.trim() : undefined,
+        description: description ? description.trim() : '',
       },
       { new: true }
     );
-
     if (!store) {
-      return res.status(404).json({ error: 'Store not found' });
+      console.log("Store not found:", req.params.id);
+      return res.status(404).json({ message: 'Store not found' });
     }
-
-    res.status(200).json(store);
+    console.log('Store updated successfully:', JSON.stringify(store, null, 2));
+    res.status(200).json({ message: 'Store updated successfully', store });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error("Error in updateStore:", error.message);
+    res.status(500).json({ message: 'Server error while updating store', error: error.message });
   }
 };
 
-// Delete Store
-/* exports.deleteStore = async (req, res) => {
+exports.deleteStore = async (req, res) => {
   try {
-    await Store.findByIdAndDelete(req.params.id);
+    const { adminID } = req.query;
+    console.log("Deleting store - ID:", req.params.id, "adminID:", adminID);
 
-     res.status(200).json({ message: 'Store deleted' });
-
-    if (!store) {
-      return res.status(404).json({ error: 'Store not found' });
+    if (!mongoose.Types.ObjectId.isValid(adminID)) {
+      console.log("Invalid adminID format:", adminID);
+      return res.status(400).json({ message: 'Invalid adminID format' });
+    }
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      console.log("Invalid store ID:", req.params.id);
+      return res.status(400).json({ message: 'Invalid store ID' });
     }
 
+    const store = await Store.findOneAndDelete({
+      _id: req.params.id,
+      createdBy: new mongoose.Types.ObjectId(adminID),
+    });
+    if (!store) {
+      console.log("Store not found:", req.params.id);
+      return res.status(404).json({ message: 'Store not found' });
+    }
+    console.log('Store deleted successfully:', JSON.stringify(store, null, 2));
     res.status(200).json({ message: 'Store deleted successfully' });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error("Error in deleteStore:", error.message);
+    res.status(500).json({ message: 'Server error while deleting store', error: error.message });
   }
-}; */
-exports.deleteStore = async (req, res) => {
-    try {
-        await Store.findByIdAndDelete(req.params.id);
-        res.status(200).json({ message: 'Store deleted' });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
 };

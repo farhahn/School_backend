@@ -4,7 +4,7 @@ const expenseSchema = new mongoose.Schema({
   expenseHead: {
     type: String,
     required: true,
-    enum: ['Miscellaneous', 'Stationery Purchase', 'Electricity Bill', 'Telephone Bill', 'Flower', 'Educational Trip'],
+    trim: true,
   },
   name: {
     type: String,
@@ -28,7 +28,7 @@ const expenseSchema = new mongoose.Schema({
     trim: true,
   },
   attachedFile: {
-    type: String, // Store file path or URL if uploaded
+    type: String,
     trim: true,
   },
   school: {

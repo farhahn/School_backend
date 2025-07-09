@@ -1,27 +1,30 @@
-// Store Model (models/store-model.js)
 const mongoose = require('mongoose');
 
 const storeSchema = new mongoose.Schema({
   storeName: {
     type: String,
-    required: true
+    required: [true, 'Store name is required'],
+    trim: true,
   },
   storeCode: {
     type: String,
-    required: true,
-    unique: true
+    required: [true, 'Store code is required'],
+    trim: true,
   },
-  description: String,
+  description: {
+    type: String,
+    trim: true,
+  },
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true
-  }
+    required: [true, 'Created by is required'],
+  },
 }, {
-  timestamps: true
+  timestamps: true,
 });
 
-// ✅ Define compound index properly:
+// Define compound index for unique storeCode per createdBy
 storeSchema.index({ storeCode: 1, createdBy: 1 }, { unique: true });
 
 module.exports = mongoose.model('Store', storeSchema);

@@ -1,4 +1,3 @@
-// models/IssueItem.js
 const mongoose = require('mongoose');
 
 const IssueItemSchema = new mongoose.Schema({
@@ -10,7 +9,7 @@ const IssueItemSchema = new mongoose.Schema({
   category: {
     type: String,
     required: [true, 'Category is required'],
-    enum: ['Chemistry Lab Apparatus', 'Books Stationery', 'Staff Dress', 'Furniture', 'Sports'],
+    trim: true,
   },
   issueDate: {
     type: Date,

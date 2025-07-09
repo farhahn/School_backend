@@ -1,44 +1,34 @@
-// models/StockItem.js
 const mongoose = require('mongoose');
 
-const StockItemSchema = new mongoose.Schema({
-  item: {
+const stockItemSchema = new mongoose.Schema({
+  itemName: {
     type: String,
-    required: [true, 'Item name is required'],
+    required: true,
     trim: true,
   },
   category: {
     type: String,
-    required: [true, 'Category is required'],
-    enum: ['Chemistry Lab Apparatus', 'Books Stationery', 'Staff Dress', 'Furniture', 'Sports'],
+    required: true,
+    trim: true,
   },
   supplier: {
     type: String,
-    required: [true, 'Supplier is required'],
-    enum: ['Camlin Stationers', 'Jhonson Uniform Dress', 'Jhon smith Supplier', 'David Furniture'],
-  },
-  store: {
-    type: String,
-    required: [true, 'Store is required'],
-    enum: ['Chemistry Equipment (Ch201)', 'Science Store (SC2)', 'Uniform Dress Store (UND23)', 'Furniture Store (FS342)', 'Sports Store (sp55)'],
+    required: true,
+    trim: true,
   },
   quantity: {
     type: Number,
-    required: [true, 'Quantity is required'],
-    min: [0, 'Quantity cannot be negative'],
+    required: true,
+    min: 0,
   },
   purchasePrice: {
     type: Number,
-    required: [true, 'Purchase price is required'],
-    min: [0, 'Purchase price cannot be negative'],
+    required: true,
+    min: 0,
   },
   purchaseDate: {
     type: Date,
-    required: [true, 'Purchase date is required'],
-  },
-  document: {
-    type: String, // Path to uploaded file
-    default: null,
+    required: true,
   },
   description: {
     type: String,
@@ -48,7 +38,7 @@ const StockItemSchema = new mongoose.Schema({
   admin: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Admin',
-    required: [true, 'Admin ID is required'],
+    required: true,
   },
   createdAt: {
     type: Date,
@@ -56,4 +46,4 @@ const StockItemSchema = new mongoose.Schema({
   },
 });
 
-module.exports = mongoose.model('StockItem', StockItemSchema);
+module.exports = mongoose.model('StockItem', stockItemSchema);
