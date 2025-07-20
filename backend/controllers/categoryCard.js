@@ -14,7 +14,7 @@ exports.getCategoryCards = async (req, res) => {
     const categoryCards = await CategoryCard.find({ admin: new mongoose.Types.ObjectId(adminID) })
       .sort({ createdAt: -1 })
       .lean();
-    console.log(`Found ${categoryCards.length} category cards`);
+    console.log(`Found ${categoryCards.length} category cards:`, JSON.stringify(categoryCards, null, 2));
     res.status(200).json({
       message: 'Category cards fetched successfully',
       data: categoryCards,

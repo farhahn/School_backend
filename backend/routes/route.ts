@@ -4,7 +4,7 @@ const router = require('express').Router();
 
 const { adminRegister, adminLogIn, getAdminDetail} = require('../controllers/admin-controller.ts');
 
-// const { sclassCreate, sclassList, deleteSclass, deleteSclasses, getSclassDetail, getSclassStudents } = require('../controllers/class-controller.ts');
+const { sclassCreate, sclassList, deleteSclass, deleteSclasses, getSclassDetail, getSclassStudents } = require('../controllers/class-controller.js');
 const { complainCreate, complainList } = require('../controllers/complain-controller.ts');
 const { noticeCreate, noticeList, deleteNotices, deleteNotice, updateNotice } = require('../controllers/notice-controller.ts');
 const {
@@ -23,7 +23,7 @@ const {
     removeStudentAttendanceBySubject,
     removeStudentAttendance } = require('../controllers/student_controller.ts');
 const { subjectCreate, classSubjects, deleteSubjectsByClass, getSubjectDetail, deleteSubject, freeSubjectList, allSubjects, deleteSubjects } = require('../controllers/subject-controller');
-// const { teacherRegister, teacherLogIn, getTeachers, getTeacherDetail,  deleteTeachersByClass,  updateTeacherSubject, teacherAttendance } = require('../controllers/teacher-controller.ts');
+const { teacherRegister, teacherLogIn, getTeachers, getTeacherDetail, deleteTeachers, deleteTeachersByClass, deleteTeacher, updateTeacherSubject, teacherAttendance } = require('../controllers/teacher-controller');
 const { 
     librarianRegister, 
     librarianLogIn, 
@@ -329,10 +329,10 @@ const uploadFields = upload.fields([
   { name: 'certificates', maxCount: 1 },
 ]);
 
-router.post('/teacher-form', uploadFields, handleMulterError, teacherController.addTeacherForm);
-router.get('/teachers', teacherController.getAllTeachers);
-router.put('/teachers/:id', uploadFields, handleMulterError, teacherController.updateTeacher);
-router.delete('/teachers/:id', teacherController.deleteTeacher);
+// router.post('/teacher-form', uploadFields, handleMulterError, teacherController.addTeacherForm);
+// router.get('/teachers', teacherController.getAllTeachers);
+// router.put('/teachers/:id', uploadFields, handleMulterError, teacherController.updateTeacher);
+// router.delete('/teachers/:id', teacherController.deleteTeacher);
 
 
 const feeCollectionController = require('../controllers/feeCollectionController');
@@ -472,14 +472,14 @@ deleteItemStock,
 } = require('../controllers/AdditemController');
 
 
-const {
-  createIssueItemStock,
-  getAllIssueItemStocks,
-  getIssueItemStockDetails,
-  updateIssueItemStock,
-  deleteIssueItemStock,
-  clearIssueItemStockErrorAction
-} = require('../controllers/issueItemStockController'); // No .ts extension
+// const {
+//   createIssueItemStock,
+//   getAllIssueItemStocks,
+//   getIssueItemStockDetails,
+//   updateIssueItemStock,
+//   deleteIssueItemStock,
+//   clearIssueItemStockErrorAction
+// } = require('../controllers/issueItemStockController'); // No .ts extension
 
 
 
@@ -836,19 +836,19 @@ router.put('/RemoveStudentAtten/:id', removeStudentAttendance)
 
 // Teacher
 
-// router.post('/TeacherReg', teacherRegister);
-// router.post('/TeacherLogin', teacherLogIn)
+router.post('/TeacherReg', teacherRegister);
+router.post('/TeacherLogin', teacherLogIn)
 
-// router.get("/Teachers/:id", getTeachers)
-// router.get("/Teacher/:id", getTeacherDetail)
+router.get("/Teachers/:id", getTeachers)
+router.get("/Teacher/:id", getTeacherDetail)
 
-// // router.delete("/Teachers/:id", deleteTeachers)
-// router.delete("/TeachersClass/:id", deleteTeachersByClass)
-// // router.delete("/Teacher/:id", deleteTeacher)
+router.delete("/Teachers/:id", deleteTeachers)
+router.delete("/TeachersClass/:id", deleteTeachersByClass)
+router.delete("/Teacher/:id", deleteTeacher)
 
-// router.put("/TeacherSubject", updateTeacherSubject)
+router.put("/TeacherSubject", updateTeacherSubject)
 
-// router.post('/TeacherAttendance/:id', teacherAttendance)
+router.post('/TeacherAttendance/:id', teacherAttendance)
 
 // Notice
 
@@ -869,28 +869,28 @@ router.get('/ComplainList/:id', complainList);
 
 // Sclass
 
-// router.post('/SclassCreate', sclassCreate);
+router.post('/SclassCreate', sclassCreate);
 
-// router.get('/SclassList/:id', sclassList);
-// router.get("/Sclass/:id", getSclassDetail)
+router.get('/SclassList/:id', sclassList);
+router.get("/Sclass/:id", getSclassDetail)
 
-// router.get("/Sclass/Students/:id", getSclassStudents)
+router.get("/Sclass/Students/:id", getSclassStudents)
 
-// router.delete("/Sclasses/:id", deleteSclasses)
-// router.delete("/Sclass/:id", deleteSclass)
+router.delete("/Sclasses/:id", deleteSclasses)
+router.delete("/Sclass/:id", deleteSclass)
 
 // Subject
 
-// router.post('/SubjectCreate', subjectCreate);
+router.post('/SubjectCreate', subjectCreate);
 
-// router.get('/AllSubjects/:id', allSubjects);
-// router.get('/ClassSubjects/:id', classSubjects);
-// router.get('/FreeSubjectList/:id', freeSubjectList);
-// router.get("/Subject/:id", getSubjectDetail)
+router.get('/AllSubjects/:id', allSubjects);
+router.get('/ClassSubjects/:id', classSubjects);
+router.get('/FreeSubjectList/:id', freeSubjectList);
+router.get("/Subject/:id", getSubjectDetail)
 
-// router.delete("/Subject/:id", deleteSubject)
-// router.delete("/Subjects/:id", deleteSubjects)
-// router.delete("/SubjectsClass/:id", deleteSubjectsByClass)
+router.delete("/Subject/:id", deleteSubject)
+router.delete("/Subjects/:id", deleteSubjects)
+router.delete("/SubjectsClass/:id", deleteSubjectsByClass)
 
 //librarian
  // ✅ `.ts` hata diya agar file `.js` hai

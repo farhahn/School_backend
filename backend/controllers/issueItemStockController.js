@@ -5,22 +5,23 @@ const CategoryCard = require('../models/categoryCardModel');
 exports.getIssueItems = async (req, res) => {
   try {
     const adminID = req.params.adminID;
+    console.log('Received adminID for issue items:', adminID);
     if (!mongoose.Types.ObjectId.isValid(adminID)) {
       console.error(`Invalid adminID format: ${adminID}`);
       return res.status(400).json({ message: 'Invalid adminID format' });
     }
-    console.log(`Fetching issue items for adminID: ${adminID}`);
+    console.log(`Querying IssueItem for admin: ${adminID}`);
     const issueItems = await IssueItem.find({ admin: new mongoose.Types.ObjectId(adminID) })
       .sort({ createdAt: -1 })
       .lean();
-    console.log(`Found ${issueItems.length} issue items for adminID: ${adminID}`);
+    console.log(`Found ${issueItems.length} issue items:`, JSON.stringify(issueItems, null, 2));
     res.status(200).json({
       message: 'Issue items fetched successfully',
       data: issueItems,
       count: issueItems.length,
     });
   } catch (error) {
-    console.error('Error fetching issue items:', error.message);
+    console.error('Error in getIssueItems:', error.stack);
     res.status(500).json({ message: 'Server error while fetching issue items', error: error.message });
   }
 };
@@ -29,18 +30,22 @@ exports.addIssueItem = async (req, res) => {
   try {
     const { item, category, issueDate, issueTo, issuedBy, quantity, status, adminID } = req.body;
     if (!item || !category || !issueDate || !issueTo || !issuedBy || !quantity || !adminID) {
-      return res.status(400).json({ message: 'Missing required fields' });
+      return res.status(400).json({ message: 'All fields are required' });
     }
     if (!mongoose.Types.ObjectId.isValid(adminID)) {
       return res.status(400).json({ message: 'Invalid adminID format' });
     }
-    // Validate category against CategoryCard
+    // Validate category exists
     const categoryExists = await CategoryCard.findOne({
-      categoryCard: { $regex: new RegExp(`^${category}$`, 'i') },
+      category: { $regex: new RegExp(`^${category}$`, 'i') },
       admin: new mongoose.Types.ObjectId(adminID),
     });
     if (!categoryExists) {
+      console.error(`Category does not exist: ${category} for admin: ${adminID}`);
       return res.status(400).json({ message: 'Category does not exist' });
+    }
+    if (isNaN(quantity) || quantity <= 0) {
+      return res.status(400).json({ message: 'Quantity must be a positive number' });
     }
     const newIssueItem = new IssueItem({
       item,
@@ -48,15 +53,15 @@ exports.addIssueItem = async (req, res) => {
       issueDate,
       issueTo,
       issuedBy,
-      quantity: parseInt(quantity),
-      status: status || 'Issued',
+      quantity,
+      status,
       admin: new mongoose.Types.ObjectId(adminID),
     });
     await newIssueItem.save();
-    console.log('Issue item added:', newIssueItem);
+    console.log('Issue item added:', JSON.stringify(newIssueItem, null, 2));
     res.status(201).json({ message: 'Issue item added successfully', data: newIssueItem });
   } catch (error) {
-    console.error('Error adding issue item:', error.message);
+    console.error('Error adding issue item:', error.stack);
     res.status(500).json({ message: 'Server error while adding issue item', error: error.message });
   }
 };
@@ -68,11 +73,11 @@ exports.updateIssueItem = async (req, res) => {
       return res.status(400).json({ message: 'Invalid adminID format' });
     }
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-      return res.status(400).json({ message: 'Invalid issue item ID' });
+      return res.status(400).json({ message: 'Invalid issue item ID format' });
     }
     const issueItem = await IssueItem.findOne({ _id: req.params.id, admin: new mongoose.Types.ObjectId(adminID) });
     if (!issueItem) {
-      return res.status(404).json({ message: 'Issue item not found' });
+      return res.status(404).json({ message: 'Issue item not found or not associated with this admin' });
     }
     if (category) {
       const categoryExists = await CategoryCard.findOne({
@@ -106,11 +111,11 @@ exports.deleteIssueItem = async (req, res) => {
       return res.status(400).json({ message: 'Invalid adminID format' });
     }
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-      return res.status(400).json({ message: 'Invalid issue item ID' });
+      return res.status(400).json({ message: 'Invalid issue item ID format' });
     }
     const issueItem = await IssueItem.findOneAndDelete({ _id: req.params.id, admin: new mongoose.Types.ObjectId(adminID) });
     if (!issueItem) {
-      return res.status(404).json({ message: 'Issue item not found' });
+      return res.status(404).json({ message: 'Issue item not found or not associated with this admin' });
     }
     console.log('Issue item deleted:', issueItem);
     res.status(200).json({ message: 'Issue item deleted successfully' });

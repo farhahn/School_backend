@@ -3,27 +3,30 @@ const Teacher = require('../models/teacherSchema.js');
 const Subject = require('../models/subjectSchema.js');
 
 const teacherRegister = async (req, res) => {
-    const { name, email, password, role, school, teachSubject, teachSclass } = req.body;
-    try {
-        const salt = await bcrypt.genSalt(10);
-        const hashedPass = await bcrypt.hash(password, salt);
+  console.log('Incoming teacherRegister body:', req.body);
 
-        const teacher = new Teacher({ name, email, password: hashedPass, role, school, teachSubject, teachSclass });
+  const { name, email, password, role, school, teachSubject, teachSclass } = req.body;
+  try {
+    console.log('teachSubject:', teachSubject);
+    const salt = await bcrypt.genSalt(10);
+    const hashedPass = await bcrypt.hash(password, salt);
 
-        const existingTeacherByEmail = await Teacher.findOne({ email });
+    const teacher = new Teacher({ name, email, password: hashedPass, role, school, teachSubject, teachSclass });
 
-        if (existingTeacherByEmail) {
-            res.send({ message: 'Email already exists' });
-        }
-        else {
-            let result = await teacher.save();
-            await Subject.findByIdAndUpdate(teachSubject, { teacher: teacher._id });
-            result.password = undefined;
-            res.send(result);
-        }
-    } catch (err) {
-        res.status(500).json(err);
+    const existingTeacherByEmail = await Teacher.findOne({ email });
+
+    if (existingTeacherByEmail) {
+      res.send({ message: 'Email already exists' });
+    } else {
+      let result = await teacher.save();
+      await Subject.findByIdAndUpdate(teachSubject, { teacher: teacher._id });
+      result.password = undefined;
+      res.send(result);
     }
+  } catch (err) {
+    console.error('teacherRegister failed:', err);
+    res.status(500).json(err);
+  }
 };
 
 const teacherLogIn = async (req, res) => {
@@ -49,22 +52,37 @@ const teacherLogIn = async (req, res) => {
 };
 
 const getTeachers = async (req, res) => {
-    try {
-        let teachers = await Teacher.find({ school: req.params.id })
-            .populate("teachSubject", "subName")
-            .populate("teachSclass", "sclassName");
-        if (teachers.length > 0) {
-            let modifiedTeachers = teachers.map((teacher) => {
-                return { ...teacher._doc, password: undefined };
-            });
-            res.send(modifiedTeachers);
-        } else {
-            res.send({ message: "No teachers found" });
-        }
-    } catch (err) {
-        res.status(500).json(err);
+  try {
+    console.log("Raw param:", req.params.id);
+    const schoolId = req.params.id.trim();
+
+    if (!mongoose.Types.ObjectId.isValid(schoolId)) {
+      console.log("❌ Invalid ObjectId");
+      return res.status(400).send({ message: "Invalid ObjectId" });
     }
+
+    const objectId = new mongoose.Types.ObjectId(schoolId);
+    console.log("Querying with ObjectId:", objectId);
+
+    const teachers = await Teacher.find({ school: objectId })
+      .populate("teachSubject", "subName")
+      .populate("teachSclass", "sclassName");
+
+    console.log(`✅ Teachers found: ${teachers.length}`);
+
+    if (teachers.length > 0) {
+      res.send(
+        teachers.map((t) => ({ ...t._doc, password: undefined }))
+      );
+    } else {
+      res.send({ message: "No teachers found" });
+    }
+  } catch (err) {
+    console.error("getTeachers ERROR:", err);
+    res.status(500).json({ message: err.message });
+  }
 };
+
 
 const getTeacherDetail = async (req, res) => {
     try {
