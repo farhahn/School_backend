@@ -4,7 +4,7 @@ const router = require('express').Router();
 
 const { adminRegister, adminLogIn, getAdminDetail} = require('../controllers/admin-controller.ts');
 
-const { sclassCreate, sclassList, deleteSclass, deleteSclasses, getSclassDetail, getSclassStudents } = require('../controllers/class-controller.js');
+// const { sclassCreate, sclassList, deleteSclass, deleteSclasses, getSclassDetail, getSclassStudents } = require('../controllers/class-controller.ts');
 const { complainCreate, complainList } = require('../controllers/complain-controller.ts');
 const { noticeCreate, noticeList, deleteNotices, deleteNotice, updateNotice } = require('../controllers/notice-controller.ts');
 const {
@@ -23,7 +23,7 @@ const {
     removeStudentAttendanceBySubject,
     removeStudentAttendance } = require('../controllers/student_controller.ts');
 const { subjectCreate, classSubjects, deleteSubjectsByClass, getSubjectDetail, deleteSubject, freeSubjectList, allSubjects, deleteSubjects } = require('../controllers/subject-controller');
-const { teacherRegister, teacherLogIn, getTeachers, getTeacherDetail, deleteTeachers, deleteTeachersByClass, deleteTeacher, updateTeacherSubject, teacherAttendance } = require('../controllers/teacher-controller');
+const { teacherRegister, teacherLogIn, getTeachers, getTeacherDetail,  deleteTeachersByClass,  updateTeacherSubject, teacherAttendance } = require('../controllers/teacher-controller');
 const { 
     librarianRegister, 
     librarianLogIn, 
@@ -472,14 +472,14 @@ deleteItemStock,
 } = require('../controllers/AdditemController');
 
 
-// const {
-//   createIssueItemStock,
-//   getAllIssueItemStocks,
-//   getIssueItemStockDetails,
-//   updateIssueItemStock,
-//   deleteIssueItemStock,
-//   clearIssueItemStockErrorAction
-// } = require('../controllers/issueItemStockController'); // No .ts extension
+const {
+  createIssueItemStock,
+  getAllIssueItemStocks,
+  getIssueItemStockDetails,
+  updateIssueItemStock,
+  deleteIssueItemStock,
+  clearIssueItemStockErrorAction
+} = require('../controllers/issueItemStockController'); // No .ts extension
 
 
 
@@ -842,9 +842,9 @@ router.post('/TeacherLogin', teacherLogIn)
 router.get("/Teachers/:id", getTeachers)
 router.get("/Teacher/:id", getTeacherDetail)
 
-router.delete("/Teachers/:id", deleteTeachers)
+// router.delete("/Teachers/:id", deleteTeachers)
 router.delete("/TeachersClass/:id", deleteTeachersByClass)
-router.delete("/Teacher/:id", deleteTeacher)
+// router.delete("/Teacher/:id", deleteTeacher)
 
 router.put("/TeacherSubject", updateTeacherSubject)
 
@@ -869,28 +869,28 @@ router.get('/ComplainList/:id', complainList);
 
 // Sclass
 
-router.post('/SclassCreate', sclassCreate);
+// router.post('/SclassCreate', sclassCreate);
 
-router.get('/SclassList/:id', sclassList);
-router.get("/Sclass/:id", getSclassDetail)
+// router.get('/SclassList/:id', sclassList);
+// router.get("/Sclass/:id", getSclassDetail)
 
-router.get("/Sclass/Students/:id", getSclassStudents)
+// router.get("/Sclass/Students/:id", getSclassStudents)
 
-router.delete("/Sclasses/:id", deleteSclasses)
-router.delete("/Sclass/:id", deleteSclass)
+// router.delete("/Sclasses/:id", deleteSclasses)
+// router.delete("/Sclass/:id", deleteSclass)
 
 // Subject
 
-router.post('/SubjectCreate', subjectCreate);
+// router.post('/SubjectCreate', subjectCreate);
 
-router.get('/AllSubjects/:id', allSubjects);
-router.get('/ClassSubjects/:id', classSubjects);
-router.get('/FreeSubjectList/:id', freeSubjectList);
-router.get("/Subject/:id", getSubjectDetail)
+// router.get('/AllSubjects/:id', allSubjects);
+// router.get('/ClassSubjects/:id', classSubjects);
+// router.get('/FreeSubjectList/:id', freeSubjectList);
+// router.get("/Subject/:id", getSubjectDetail)
 
-router.delete("/Subject/:id", deleteSubject)
-router.delete("/Subjects/:id", deleteSubjects)
-router.delete("/SubjectsClass/:id", deleteSubjectsByClass)
+// router.delete("/Subject/:id", deleteSubject)
+// router.delete("/Subjects/:id", deleteSubjects)
+// router.delete("/SubjectsClass/:id", deleteSubjectsByClass)
 
 //librarian
  // ✅ `.ts` hata diya agar file `.js` hai
